@@ -1,4 +1,6 @@
-streamlit
+fastapi
+uvicorn
+python-multipart
 langchain>=0.2.0
 langchain-community>=0.2.0
 langchain-google-genai
