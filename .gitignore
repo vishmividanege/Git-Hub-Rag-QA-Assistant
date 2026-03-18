@@ -3,8 +3,11 @@ __pycache__/
 *$py.class
 venv/
 env/
+data/
 .env
 db/
 repo_storage/
 .streamlit/
 test_backend.py
+verification_output.txt
+verify_rag.py

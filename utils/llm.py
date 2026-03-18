@@ -1,8 +1,19 @@
-from langchain_community.llms import Ollama
+import os
+from langchain_google_genai import ChatGoogleGenerativeAI
+from dotenv import load_dotenv
 
-def get_llm(model_name="llama3"):
-    try:
-        return Ollama(model=model_name)
-    except Exception:
-        # Fallback to a common model if llama3 fails or isn't present
-        return Ollama(model="mistral")
+load_dotenv()
+
+from utils.config import LLM_MODEL_NAME, LLM_TEMPERATURE
+
+def get_llm(model_name=LLM_MODEL_NAME):
+    api_key = os.getenv("GOOGLE_API_KEY")
+    if not api_key:
+        raise ValueError("GOOGLE_API_KEY not found in environment variables. Please set it in the sidebar or a .env file.")
+    
+    return ChatGoogleGenerativeAI(
+        model=model_name,
+        google_api_key=api_key,
+        temperature=LLM_TEMPERATURE,
+        convert_system_message_to_human=True
+    )

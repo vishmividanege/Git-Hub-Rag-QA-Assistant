@@ -1,9 +1,10 @@
 streamlit
-langchain
-langchain-community
+langchain>=0.2.0
+langchain-community>=0.2.0
+langchain-google-genai
 chromadb
 sentence-transformers
 GitPython
-unstructured
-pydantic
+python-dotenv
 tiktoken
+pydantic

@@ -2,10 +2,11 @@
 from langchain_classic.chains import RetrievalQA
 from utils.vector_store import load_vector_store
 from utils.llm import get_llm
+from utils.config import TOP_K
 
 def get_qa_chain(repo_id):
     db = load_vector_store(repo_id)
-    retriever = db.as_retriever(search_kwargs={"k": 5})
+    retriever = db.as_retriever(search_kwargs={"k": TOP_K})
 
     qa = RetrievalQA.from_chain_type(
         llm=get_llm(),
@@ -17,9 +18,9 @@ def get_qa_chain(repo_id):
 
 def ask_question(query, repo_id):
     qa = get_qa_chain(repo_id)
-    result = qa({"query": query})
+    result = qa.invoke({"query": query})
 
     answer = result["result"]
-    sources = [doc.metadata["source"] for doc in result["source_documents"]]
+    sources = [doc.metadata.get("source", "Unknown") for doc in result["source_documents"]]
 
     return answer, list(set(sources))

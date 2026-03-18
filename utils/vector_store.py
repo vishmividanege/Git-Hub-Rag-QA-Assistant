@@ -2,8 +2,11 @@
 import os
 from langchain_chroma import Chroma
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_huggingface import HuggingFaceEmbeddings
-from utils.config import CHUNK_SIZE, CHUNK_OVERLAP, DB_PATH
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from utils.config import CHUNK_SIZE, CHUNK_OVERLAP, VECTORSTORE_DIR, EMBEDDING_MODEL_NAME
+
+def get_embeddings():
+    return GoogleGenerativeAIEmbeddings(model=EMBEDDING_MODEL_NAME)
 
 def create_vector_store(documents, repo_id):
     splitter = RecursiveCharacterTextSplitter(
@@ -12,9 +15,9 @@ def create_vector_store(documents, repo_id):
     )
     chunks = splitter.split_documents(documents)
 
-    embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+    embeddings = get_embeddings()
 
-    persist_dir = os.path.join(DB_PATH, repo_id)
+    persist_dir = os.path.join(VECTORSTORE_DIR, repo_id)
     
     db = Chroma.from_documents(
         chunks,
@@ -25,8 +28,8 @@ def create_vector_store(documents, repo_id):
     return db
 
 def load_vector_store(repo_id):
-    embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-    persist_dir = os.path.join(DB_PATH, repo_id)
+    embeddings = get_embeddings()
+    persist_dir = os.path.join(VECTORSTORE_DIR, repo_id)
 
     return Chroma(
         persist_directory=persist_dir,

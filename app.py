@@ -74,7 +74,23 @@ st.markdown("""
 # --- Sidebar ---
 with st.sidebar:
     st.markdown("<h1 style='color: #60a5fa;'>Settings</h1>", unsafe_allow_html=True)
-    st.info("Ensure Ollama is running locally with 'llama3' model.")
+    
+    # Google API Key Handling
+    env_key = os.getenv("GOOGLE_API_KEY")
+    api_key = st.text_input(
+        "Enter Google API Key", 
+        value=env_key if env_key else "",
+        type="password", 
+        help="Get your key from https://aistudio.google.com/app/apikey. If you set it in .env, it will appear here."
+    )
+    
+    if api_key:
+        os.environ["GOOGLE_API_KEY"] = api_key
+        st.success("API Key is Active!")
+    else:
+        st.warning("Please enter your Google API Key or set it in the .env file.")
+    
+    st.info("The assistant is now powered by Google Gemini 1.5 Flash.")
     
     if st.button("Clear Cache"):
         st.cache_data.clear()
@@ -82,7 +98,7 @@ with st.sidebar:
 
 # --- Main UI ---
 st.markdown("<div class='header-text'>GitHub RAG Assistant</div>", unsafe_allow_html=True)
-st.markdown("<p style='color: #94a3b8; font-size: 1.2rem; margin-bottom: 2rem;'>Chat with any GitHub repository using local AI.</p>", unsafe_allow_html=True)
+st.markdown("<p style='color: #94a3b8; font-size: 1.2rem; margin-bottom: 2rem;'>Chat with any GitHub repository using Google Gemini.</p>", unsafe_allow_html=True)
 
 # Repository Input Section
 col1, col2 = st.columns([3, 1])
