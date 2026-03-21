@@ -1,5 +1,6 @@
 import os
 import time
+import shutil
 from langchain_chroma import Chroma
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
@@ -21,6 +22,23 @@ def create_vector_store(documents, repo_id):
     embeddings = get_embeddings()
 
     persist_dir = os.path.join(VECTORSTORE_DIR, repo_id)
+    
+    # NEW: Safely clear existing vector store without deleting the folder (prevents WinError 32 on Windows)
+    if os.path.exists(persist_dir):
+        print(f"Clearing existing vector store for {repo_id}...")
+        try:
+            temp_db = Chroma(persist_directory=persist_dir, embedding_function=embeddings)
+            all_data = temp_db.get()
+            if all_data['ids']:
+                temp_db.delete(ids=all_data['ids'])
+            print("Existing data cleared.")
+        except Exception as e:
+            print(f"Warning: Could not clear existing data efficiently: {e}")
+            # Fallback for severe cases, though likely to fail if locked
+            try:
+                shutil.rmtree(persist_dir)
+            except:
+                pass
     
     total_chunks = len(chunks)
     if total_chunks == 0:

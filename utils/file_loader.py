@@ -1,4 +1,4 @@
-# utils/file_loader.py
+
 import os
 from langchain_community.document_loaders import TextLoader
 from utils.config import SUPPORTED_EXTENSIONS
@@ -7,7 +7,7 @@ def load_files(repo_path):
     documents = []
 
     for root, dirs, files in os.walk(repo_path):
-        # Skip .git, node_modules, and other common build/test dirs
+        
         if any(idx in root for idx in [".git", "node_modules", "__pycache__", "dist", "build", "venv"]):
             continue
 

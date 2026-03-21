@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from utils.config import LLM_MODEL_NAME, LLM_TEMPERATURE
+from utils.config import LLM_MODEL_NAME, LLM_TEMPERATURE, LLM_MAX_NEW_TOKENS
 
 def get_llm(model_name=LLM_MODEL_NAME):
     api_key = os.getenv("GOOGLE_API_KEY")
@@ -15,5 +15,6 @@ def get_llm(model_name=LLM_MODEL_NAME):
         model=model_name,
         google_api_key=api_key,
         temperature=LLM_TEMPERATURE,
+        max_output_tokens=LLM_MAX_NEW_TOKENS,
         convert_system_message_to_human=True
     )
