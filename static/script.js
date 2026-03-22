@@ -1,4 +1,35 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Check if the page is being served over file:// protocol
+    if (window.location.protocol === 'file:') {
+        const errorOverlay = document.createElement('div');
+        errorOverlay.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9); color: #fff; display: flex;
+            flex-direction: column; align-items: center; justify-content: center;
+            z-index: 10000; text-align: center; padding: 20px; font-family: 'Inter', sans-serif;
+        `;
+        errorOverlay.innerHTML = `
+            <h1 style="color: #ff4d4d; margin-bottom: 20px;">⚠️ Local Access Error</h1>
+            <p style="font-size: 1.2rem; max-width: 600px; line-height: 1.6;">
+                You are opening <strong>index.html</strong> directly from your file system.<br>
+                This causes browser security issues that prevent communication with the backend.
+            </p>
+            <div style="background: #222; padding: 20px; border-radius: 12px; margin: 30px 0; border: 1px solid #444; width: 100%; max-width: 500px;">
+                <p style="margin-top: 0; color: #aaa;">To fix this:</p>
+                <div style="text-align: left; display: inline-block;">
+                    <code style="display: block; margin-bottom: 10px; color: #00ff00;">1. Keep <strong>python backend.py</strong> running</code>
+                    <code style="display: block; color: #00ff00;">2. Open <strong>http://localhost:8000</strong></code>
+                </div>
+            </div>
+            <a href="http://localhost:8000" style="
+                padding: 15px 40px; background: linear-gradient(135deg, #6e8efb, #a777e3);
+                color: white; text-decoration: none; border-radius: 30px; 
+                font-weight: 600; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            ">Go to Localhost</a>
+        `;
+        document.body.appendChild(errorOverlay);
+    }
+
     const repoUrlInput = document.getElementById('repo-url');
     const processBtn = document.getElementById('process-btn');
     const statusContainer = document.getElementById('status-container');

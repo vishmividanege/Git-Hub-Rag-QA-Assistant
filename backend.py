@@ -1,5 +1,6 @@
 import os
 from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import List, Optional
@@ -12,6 +13,15 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = FastAPI(title="GitHub RAG Assistant API")
+
+# Add CORS middleware to allow cross-origin requests
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Simple in-memory store for processing status
 repo_status = {}
@@ -70,4 +80,6 @@ app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="localhost", port=8000)
+
+#uvicorn.run(app, host="0.0.0.0", port=8000)

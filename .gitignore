@@ -11,3 +11,4 @@ repo_storage/
 test_backend.py
 verification_output.txt
 verify_rag.py
+.venv
