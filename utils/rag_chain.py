@@ -1,5 +1,5 @@
 
-from utils.config import TOP_K, SEARCH_TYPE
+from utils.config import TOP_K
 from utils.vector_store import load_vector_store
 from utils.llm import get_llm
 from langchain_classic.chains import RetrievalQA
@@ -25,11 +25,8 @@ PROMPT = PromptTemplate(
 
 def get_qa_chain(repo_id):
     db = load_vector_store(repo_id)
-    # Map "cosine similarity" to "similarity" for LangChain's retriever
-    retriever_type = "similarity" if SEARCH_TYPE == "cosine similarity" else SEARCH_TYPE
-    
     retriever = db.as_retriever(
-        search_type=retriever_type,
+        search_type="similarity",
         search_kwargs={"k": TOP_K}
     )
 
@@ -45,26 +42,14 @@ def get_qa_chain(repo_id):
 def ask_question(query, repo_id):
     db = load_vector_store(repo_id)
     
-    # Manual retrieval to get documentation and scores
-    if SEARCH_TYPE == "mmr":
-        source_docs = db.max_marginal_relevance_search(query, k=TOP_K)
-        # Fetch similarity scores for a larger pool to match against MMR docs
-        candidates_with_scores = db.similarity_search_with_score(query, k=100)
+    # Retrieve docs with similarity scores
+    docs_and_scores = db.similarity_search_with_score(query, k=TOP_K)
+    # Sort by distance (ascending = most similar first)
+    docs_and_scores.sort(key=lambda x: x[1])
+    source_docs = [doc for doc, score in docs_and_scores]
+    for doc, score in docs_and_scores:
         # Convert distance to similarity score (1 - distance)
-        score_map = {doc.page_content: max(0, 1 - score) for doc, score in candidates_with_scores}
-        
-        for doc in source_docs:
-            doc.metadata["score"] = score_map.get(doc.page_content, "N/A")
-    else:
-        # For similarity, we can get scores directly
-        docs_and_scores = db.similarity_search_with_score(query, k=TOP_K)
-        # Sort by score (distance) just in case, though Chroma usually returns them ordered
-        docs_and_scores.sort(key=lambda x: x[1])
-        source_docs = [doc for doc, score in docs_and_scores]
-        for i, (doc, score) in enumerate(docs_and_scores):
-            # Convert distance to similarity score (1 - distance)
-            similarity = max(0, 1 - score)
-            doc.metadata["score"] = similarity
+        doc.metadata["score"] = max(0, 1 - score)
 
     qa = get_qa_chain(repo_id)
     result = qa.invoke({"query": query})
@@ -72,7 +57,7 @@ def ask_question(query, repo_id):
     
     # Display relevant chunks in terminal
     print("\n" + "="*60)
-    print(f"TOP {len(source_docs)} RELEVANT CHUNKS ({SEARCH_TYPE.upper()}):")
+    print(f"TOP {len(source_docs)} RELEVANT CHUNKS (SIMILARITY):")
     print("="*60)
     for i, doc in enumerate(source_docs):
         score_val = doc.metadata.get('score', 'N/A')
