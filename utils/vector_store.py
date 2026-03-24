@@ -23,7 +23,7 @@ def create_vector_store(documents, repo_id):
 
     persist_dir = os.path.join(VECTORSTORE_DIR, repo_id)
     
-    # NEW: Safely clear existing vector store without deleting the folder (prevents WinError 32 on Windows)
+
     if os.path.exists(persist_dir):
         print(f"Clearing existing vector store for {repo_id}...")
         try:
@@ -34,7 +34,7 @@ def create_vector_store(documents, repo_id):
             print("Existing data cleared.")
         except Exception as e:
             print(f"Warning: Could not clear existing data efficiently: {e}")
-            # Fallback for severe cases, though likely to fail if locked
+            
             try:
                 shutil.rmtree(persist_dir)
             except:
@@ -46,7 +46,7 @@ def create_vector_store(documents, repo_id):
 
     print(f"Starting vector store creation for {repo_id} with {total_chunks} chunks.")
     
-    # Process first batch to initialize Chroma
+    
     first_batch = chunks[:EMBEDDING_BATCH_SIZE]
     db = Chroma.from_documents(
         first_batch,
@@ -54,7 +54,7 @@ def create_vector_store(documents, repo_id):
         persist_directory=persist_dir
     )
 
-    # Process remaining chunks in batches with delay
+    
     for i in range(EMBEDDING_BATCH_SIZE, total_chunks, EMBEDDING_BATCH_SIZE):
         batch = chunks[i : i + EMBEDDING_BATCH_SIZE]
         print(f"Embedding batch {i} to {min(i + EMBEDDING_BATCH_SIZE, total_chunks)}...")
