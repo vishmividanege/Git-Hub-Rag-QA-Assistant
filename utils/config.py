@@ -10,18 +10,18 @@ UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 VECTORSTORE_DIR.mkdir(parents=True, exist_ok=True)
 
 # ---------- Chunking ----------
-CHUNK_SIZE = 512
-CHUNK_OVERLAP = 120
+CHUNK_SIZE = 1000
+CHUNK_OVERLAP = 150
 
 # ---------- Retrieval ----------
-TOP_K = 6
+TOP_K = 8
 SEARCH_TYPE = "cosine similarity"
 
 # ---------- Models ----------
 
 EMBEDDING_MODEL_NAME = "models/gemini-embedding-2-preview"
 LLM_MODEL_NAME = "models/gemini-flash-latest"
-LLM_MAX_NEW_TOKENS = 512
+LLM_MAX_NEW_TOKENS = 1024
 LLM_TEMPERATURE = 0.2
 
 # Rate limiting for embeddings (Gemini Free Tier: 100 RPM)
