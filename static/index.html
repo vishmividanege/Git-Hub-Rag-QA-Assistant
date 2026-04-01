@@ -1,67 +1,14 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub RAG Assistant | AI-Powered Repository Intelligence</title>
-    <meta name="description" content="Chat with any GitHub repository using Google Gemini and RAG technology.">
-    <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-</head>
-
-<body>
-    <div class="app-container">
-        <header>
-            <div class="logo">
-                <span class="icon">💻</span>
-                <h1>GitHub RAG Assistant</h1>
-            </div>
-            <p class="subtitle">Chat with any GitHub repository using Google Gemini.</p>
-        </header>
-
-        <main>
-            <section class="input-section">
-                <div class="input-group">
-                    <input type="text" id="repo-url" placeholder="https://github.com/username/repo"
-                        aria-label="GitHub Repository URL">
-                    <button id="process-btn">Deep Scan Repo</button>
-                </div>
-                <div id="status-container" class="status-container hidden">
-                    <div class="spinner"></div>
-                    <span id="status-text">Analyzing Repository...</span>
-                </div>
-            </section>
-
-            <section id="chat-section" class="chat-section hidden">
-                <div class="divider"></div>
-                <h3>Ask your question</h3>
-                <div class="input-group">
-                    <input type="text" id="query-input" placeholder="e.g., 'How does the authentication flow work?'"
-                        aria-label="Question about the repository">
-                    <button id="ask-btn">Ask Intelligence</button>
-                </div>
-
-                <div id="response-container" class="response-container hidden">
-                    <div class="divider"></div>
-                    <h4>Intelligence Response</h4>
-                    <div id="answer-text" class="answer-text"></div>
-
-                    <div class="sources-wrapper">
-                        <button id="toggle-sources" class="secondary-btn">View Grounding Sources</button>
-                        <div id="sources-list" class="sources-list hidden"></div>
-                    </div>
-                </div>
-            </section>
-        </main>
-
-        <footer>
-            <p></p>
-        </footer>
-    </div>
-    <script src="script.js"></script>
-</body>
-
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GitHub RAG Assistant</title>
+    <script type="module" crossorigin src="/assets/index-CqaYxzKo.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DK_l-LKr.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
 </html>

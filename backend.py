@@ -32,6 +32,7 @@ class ProcessRequest(BaseModel):
 class QueryRequest(BaseModel):
     question: str
     repo_id: str
+    chat_history: Optional[List[dict]] = []
 
 @app.post("/api/process")
 async def process_repository(request: ProcessRequest, background_tasks: BackgroundTasks):
@@ -69,7 +70,7 @@ async def get_status(repo_id: str):
 @app.post("/api/query")
 async def query_repository(request: QueryRequest):
     try:
-        answer, sources = ask_question(request.question, request.repo_id)
+        answer, sources = ask_question(request.question, request.repo_id, request.chat_history)
         return {"answer": answer, "sources": sources}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

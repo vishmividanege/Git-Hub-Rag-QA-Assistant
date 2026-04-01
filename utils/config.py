@@ -19,19 +19,34 @@ SEARCH_TYPE = "cosine similarity"
 
 # ---------- Models ----------
 
-EMBEDDING_MODEL_NAME = "models/gemini-embedding-2-preview"
-LLM_MODEL_NAME = "models/gemini-flash-latest"
+EMBEDDING_MODEL_NAME = "text-embedding-3-small"
+LLM_MODEL_NAME = "gpt-4o-mini"
 LLM_MAX_NEW_TOKENS = 1024
 LLM_TEMPERATURE = 0.2
 
-# Rate limiting for embeddings (Gemini Free Tier: 100 RPM)
-EMBEDDING_BATCH_SIZE = 30
-EMBEDDING_BATCH_DELAY = 5
+# Rate limiting for embeddings 
+EMBEDDING_BATCH_SIZE = 100
+EMBEDDING_BATCH_DELAY = 0
 
-# File types to process
-SUPPORTED_EXTENSIONS = (
-    ".py", ".js", ".ts", ".tsx", ".jsx", 
-    ".md", ".txt", ".json", ".yaml", ".yml",
-    ".java", ".cpp", ".c", ".h", ".go", ".rs",
-    ".php", ".rb", ".sh", ".sql"
-)
+# Directories to ignore
+EXCLUDED_DIRS = {
+    ".git", "node_modules", "__pycache__", "dist", "build", "venv", 
+    ".venv", "env", ".env_vars", "target", "bin", "obj", ".idea", ".vscode"
+}
+
+# Extensions to ignore 
+EXCLUDED_EXTENSIONS = {
+    # Images
+    ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".ico", ".svg", ".webp",
+    # Media
+    ".mp3", ".mp4", ".mov", ".avi", ".wav",
+    # Archives
+    ".zip", ".tar", ".gz", ".7z", ".rar",
+    # Binaries/Compiled
+    ".exe", ".dll", ".so", ".bin", ".pyc", ".pyd", ".o", ".a", ".lib",
+    # Fonts
+    ".woff", ".woff2", ".ttf", ".eot", ".otf",
+    # Data/Large
+    ".csv", ".sqlite", ".db", ".parquet", ".pickle",
+    
+}
