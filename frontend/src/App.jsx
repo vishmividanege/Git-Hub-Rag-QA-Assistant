@@ -81,8 +81,7 @@ function App() {
 
       const aiMsg = {
         role: 'ai',
-        content: response.data.answer,
-        sources: response.data.sources
+        content: response.data.answer
       };
       setMessages(prev => [...prev, aiMsg]);
     } catch (err) {
@@ -150,17 +149,7 @@ function App() {
               </div>
               <div className="message-content">
                 <ReactMarkdown>{msg.content}</ReactMarkdown>
-                {msg.sources && msg.sources.length > 0 && (
-                  <div style={{ marginTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '0.5rem' }}>
-                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
-                      {msg.sources.map((src, i) => (
-                        <span key={i} title={src} style={{ fontSize: '0.65rem', background: 'rgba(255,255,255,0.05)', padding: '2px 6px', borderRadius: '4px', opacity: 0.6, cursor: 'help' }}>
-                          {src.split(/[\\/]/).pop()}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
+
               </div>
             </div>
           ))}

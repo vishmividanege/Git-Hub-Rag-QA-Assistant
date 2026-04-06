@@ -1,101 +1,95 @@
 from utils.config import TOP_K
 from utils.vector_store import load_vector_store
 from utils.llm import get_llm
-from langchain_classic.chains import ConversationalRetrievalChain
-from langchain_core.prompts import PromptTemplate
+from langchain_classic.chains.history_aware_retriever import create_history_aware_retriever
+from langchain_classic.chains.retrieval import create_retrieval_chain
+from langchain_classic.chains.combine_documents import create_stuff_documents_chain
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.messages import HumanMessage, AIMessage
 
 
-# prompt template for better RAG responses ---------------------------------------------------------
-prompt_template = """You are the GitHub RAG Assistant. Use the following pieces of context to answer the user's question.
+# 1. Prompt for rephrasing the question based on history ------------------------------------------
+contextualize_q_system_prompt = (
+    "Given a chat history and the latest user question "
+    "which might reference context in the chat history, "
+    "formulate a standalone question which can be understood "
+    "without the chat history. Do NOT answer the question, "
+    "just reformulate it if needed and otherwise return it as is."
+)
+
+contextualize_q_prompt = ChatPromptTemplate.from_messages(
+    [
+        ("system", contextualize_q_system_prompt),
+        MessagesPlaceholder("chat_history"),
+        ("human", "{input}"),
+    ]
+)
+
+# 2. Prompt for generating the final answer -------------------------------------------------------
+qa_system_prompt = """You are the GitHub RAG Assistant. Use the following pieces of context to answer the user's question.
 If the context contains lists of features, requirements, or steps, please present them clearly using markdown bullet points.
 If you don't know the answer or the context doesn't provide enough information, honestly state that you don't know.
 Be thorough and provide full code implementations if requested.
 
 Context:
-{context}
+{context}"""
 
-Question: {question}
-Helpful Answer:"""
-
-PROMPT = PromptTemplate(
-    template=prompt_template, input_variables=["context", "question"]
+qa_prompt = ChatPromptTemplate.from_messages(
+    [
+        ("system", qa_system_prompt),
+        MessagesPlaceholder("chat_history"),
+        ("human", "{input}"),
+    ]
 )
 
-# Template for condensing history + new question into a standalone question
-condense_template = """Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in its original language.
-
-Chat History:
-{chat_history}
-Follow Up Input: {question}
-Standalone question:"""
-
-CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(condense_template)
 ################################################################################
 
 def get_qa_chain(repo_id):
+    llm = get_llm()
     db = load_vector_store(repo_id)
     retriever = db.as_retriever(
         search_type="similarity",
         search_kwargs={"k": TOP_K}
     )
 
-    qa = ConversationalRetrievalChain.from_llm(
-        llm=get_llm(),
-        retriever=retriever,
-        return_source_documents=True,
-        combine_docs_chain_kwargs={"prompt": PROMPT},
-        condense_question_prompt=CONDENSE_QUESTION_PROMPT
+    # Create the history-aware retriever
+    history_aware_retriever = create_history_aware_retriever(
+        llm, retriever, contextualize_q_prompt
     )
 
-    return qa
+    # Create the document-combining chain
+    question_answer_chain = create_stuff_documents_chain(llm, qa_prompt)
+
+    # Combine them into the final RAG chain
+    rag_chain = create_retrieval_chain(history_aware_retriever, question_answer_chain)
+
+    return rag_chain
 
 def ask_question(query, repo_id, chat_history_dicts=None):
-    db = load_vector_store(repo_id)
-    
-    # Format chat history for LangChain [(human, ai), ...]
+    # Format chat history for LangChain [HumanMessage, AIMessage, ...]
     chat_history = []
     if chat_history_dicts:
-        # We need to pair them up or handle them as messages
-        # Simple approach: assume they are in order and user/ai alternate
-        # Actually, ConversationalRetrievalChain expects a list of tuples
-        curr_user = None
         for msg in chat_history_dicts:
             if msg['role'] == 'user':
-                curr_user = msg['content']
-            elif msg['role'] == 'ai' and curr_user is not None:
-                chat_history.append((curr_user, msg['content']))
-                curr_user = None
+                chat_history.append(HumanMessage(content=msg['content']))
+            elif msg['role'] == 'ai':
+                chat_history.append(AIMessage(content=msg['content']))
 
-    # Retrieve docs with similarity scores (for debugging output)
-    docs_and_scores = db.similarity_search_with_score(query, k=TOP_K)
-    # Sort by distance (ascending = most similar first)
-    docs_and_scores.sort(key=lambda x: x[1])
+    # Create the chain
+    rag_chain = get_qa_chain(repo_id)
     
-    source_docs = []
-    for doc, score in docs_and_scores:
-        # Convert distance to similarity score (1 - distance for cosine)
-        try:
-            dist = float(score)
-            doc.metadata["distance"] = dist
-            doc.metadata["score"] = max(0, 1 - dist)
-        except (ValueError, TypeError):
-            doc.metadata["score"] = 0.0
-        source_docs.append(doc)
-
-    qa = get_qa_chain(repo_id)
-    result = qa.invoke({"question": query, "chat_history": chat_history})
+    # Invoke the chain
+    result = rag_chain.invoke({"input": query, "chat_history": chat_history})
+    
     answer = result["answer"]
+    source_docs = result.get("context", [])
     
     # Display relevant chunks in terminal
     print("\n" + "="*60)
     print(f"TOP {len(source_docs)} RELEVANT CHUNKS (SIMILARITY):")
     print("="*60)
     for i, doc in enumerate(source_docs):
-        score_val = doc.metadata.get('score')
-        dist_val = doc.metadata.get('distance', 0.0)
-        # Use "Similarity Score" and include Raw distance for debugging
-        score_str = f" | Score: {score_val:.4f} (Dist: {dist_val:.4f})" if score_val is not None else ""
-        print(f"\n--- Chunk {i+1} (Source: {doc.metadata.get('source', 'Unknown')}{score_str}) ---")
+        print(f"\n--- Chunk {i+1} (Source: {doc.metadata.get('source', 'Unknown')}) ---")
         print(doc.page_content)
     print("="*60 + "\n")
 
