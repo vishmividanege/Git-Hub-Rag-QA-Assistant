@@ -8,7 +8,7 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.messages import HumanMessage, AIMessage
 
 
-# 1. Prompt for rephrasing the question based on history ------------------------------------------
+
 contextualize_q_system_prompt = (
     "Given a chat history and the latest user question "
     "which might reference context in the chat history, "
@@ -25,7 +25,7 @@ contextualize_q_prompt = ChatPromptTemplate.from_messages(
     ]
 )
 
-# 2. Prompt for generating the final answer -------------------------------------------------------
+
 qa_system_prompt = """You are the GitHub RAG Assistant. Use the following pieces of context to answer the user's question.
 If the context contains lists of features, requirements, or steps, please present them clearly using markdown bullet points.
 If you don't know the answer or the context doesn't provide enough information, honestly state that you don't know.
@@ -42,7 +42,6 @@ qa_prompt = ChatPromptTemplate.from_messages(
     ]
 )
 
-################################################################################
 
 def get_qa_chain(repo_id):
     llm = get_llm()
@@ -52,21 +51,21 @@ def get_qa_chain(repo_id):
         search_kwargs={"k": TOP_K}
     )
 
-    # Create the history-aware retriever
+    
     history_aware_retriever = create_history_aware_retriever(
         llm, retriever, contextualize_q_prompt
     )
 
-    # Create the document-combining chain
+    
     question_answer_chain = create_stuff_documents_chain(llm, qa_prompt)
 
-    # Combine them into the final RAG chain
+   
     rag_chain = create_retrieval_chain(history_aware_retriever, question_answer_chain)
 
     return rag_chain
 
 def ask_question(query, repo_id, chat_history_dicts=None):
-    # Format chat history for LangChain [HumanMessage, AIMessage, ...]
+    
     chat_history = []
     if chat_history_dicts:
         for msg in chat_history_dicts:
@@ -75,21 +74,28 @@ def ask_question(query, repo_id, chat_history_dicts=None):
             elif msg['role'] == 'ai':
                 chat_history.append(AIMessage(content=msg['content']))
 
-    # Create the chain
+
     rag_chain = get_qa_chain(repo_id)
     
-    # Invoke the chain
+    
     result = rag_chain.invoke({"input": query, "chat_history": chat_history})
     
     answer = result["answer"]
     source_docs = result.get("context", [])
     
-    # Display relevant chunks in terminal
+
+    db = load_vector_store(repo_id)
+    
+    docs_with_scores = db.similarity_search_with_score(query, k=len(source_docs))
+
+    
     print("\n" + "="*60)
     print(f"TOP {len(source_docs)} RELEVANT CHUNKS (SIMILARITY):")
     print("="*60)
-    for i, doc in enumerate(source_docs):
-        print(f"\n--- Chunk {i+1} (Source: {doc.metadata.get('source', 'Unknown')}) ---")
+    
+   
+    for i, (doc, score) in enumerate(docs_with_scores):
+        print(f"\n--- Chunk {i+1} (Score: {score:.4f}, Source: {doc.metadata.get('source', 'Unknown')}) ---")
         print(doc.page_content)
     print("="*60 + "\n")
 
