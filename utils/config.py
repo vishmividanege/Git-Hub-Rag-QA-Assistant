@@ -23,6 +23,22 @@ EMBEDDING_MODEL_NAME = "text-embedding-3-small"
 LLM_MODEL_NAME = "gpt-4o-mini"
 LLM_MAX_NEW_TOKENS = 1024
 LLM_TEMPERATURE = 0.2
+MAX_CHAT_HISTORY = 10
+
+# ---------- Guardrails ----------
+
+ENABLE_SECRET_SCANNING = True
+
+SKIP_FILES_WITH_SECRETS = True
+
+EXCLUDED_FILENAMES = {
+    ".env", ".env.local", ".env.production", ".env.development",
+    "secrets.json", "credentials.json", "credentials.yml", "credentials.yaml",
+    "config.secret.json", "serviceAccountKey.json",
+    "id_rsa", "id_dsa", "id_ecdsa", "id_ed25519",
+}
+
+EXCLUDED_SECRET_EXTENSIONS = {".pem", ".key", ".p12", ".pfx", ".cer", ".cert", ".crt"}
 
 # Rate limiting for embeddings 
 EMBEDDING_BATCH_SIZE = 100

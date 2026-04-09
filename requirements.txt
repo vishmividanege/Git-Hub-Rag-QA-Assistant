@@ -11,3 +11,5 @@ GitPython
 python-dotenv
 tiktoken
 pydantic
+guardrails-ai
+detect-secrets

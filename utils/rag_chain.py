@@ -1,4 +1,4 @@
-from utils.config import TOP_K
+from utils.config import TOP_K, MAX_CHAT_HISTORY
 from utils.vector_store import load_vector_store
 from utils.llm import get_llm
 from langchain_classic.chains.history_aware_retriever import create_history_aware_retriever
@@ -68,7 +68,9 @@ def ask_question(query, repo_id, chat_history_dicts=None):
     
     chat_history = []
     if chat_history_dicts:
-        for msg in chat_history_dicts:
+       
+        limited_history = chat_history_dicts[-MAX_CHAT_HISTORY:]
+        for msg in limited_history:
             if msg['role'] == 'user':
                 chat_history.append(HumanMessage(content=msg['content']))
             elif msg['role'] == 'ai':
