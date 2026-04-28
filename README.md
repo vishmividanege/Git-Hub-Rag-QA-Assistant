@@ -5,9 +5,9 @@ A powerful tool to chat with any GitHub repository using RAG (Retrieval-Augmente
 ## 🚀 Getting Started
 
 ### 1. Setup Environment
-Ensure you have a `.env` file in the root directory with your Gemini API key:
+Ensure you have a `.env` file in the root directory with your OpenAI API key:
 ```env
-GOOGLE_API_KEY=your_api_key_here
+OPENAI_API_KEY=your_api_key_here
 ```
 
 ### 2. Install Dependencies

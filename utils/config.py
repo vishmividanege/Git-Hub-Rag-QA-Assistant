@@ -47,7 +47,8 @@ EMBEDDING_BATCH_DELAY = 0
 # Directories to ignore
 EXCLUDED_DIRS = {
     ".git", "node_modules", "__pycache__", "dist", "build", "venv", 
-    ".venv", "env", ".env_vars", "target", "bin", "obj", ".idea", ".vscode"
+    ".venv", "env", ".env_vars", "target", "bin", "obj", ".idea", ".vscode",
+    "out", ".next", ".cache", "logs", "tmp"
 }
 
 # Extensions to ignore 
@@ -64,5 +65,6 @@ EXCLUDED_EXTENSIONS = {
     ".woff", ".woff2", ".ttf", ".eot", ".otf",
     # Data/Large
     ".csv", ".sqlite", ".db", ".parquet", ".pickle",
-    
+    # Compiled/Minified JS/CSS
+    ".min.js", ".min.css", ".map", ".chunk.js", ".bundle.js"
 }

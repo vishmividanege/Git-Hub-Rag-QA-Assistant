@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 _secrets_guard = None
 
 def _get_secrets_guard():
-    """Returns a cached Guard instance using only Guardrails AI for secret checking."""
+    
     global _secrets_guard
     if _secrets_guard is None:
         try:
@@ -49,7 +49,7 @@ def _get_secrets_guard():
 
 def _has_secrets(file_path: str) -> bool:
     """
-    Scan file content for simple secrets using only Guardrails AI.
+    Scan file content for simple secrets using  Guardrails AI.
     Returns True if any secrets are detected, False otherwise.
     """
     guard = _get_secrets_guard()
